@@ -32,7 +32,8 @@ class World():
     def set_cell(self, x, y, cell):
         assert is_nothing(cell) or is_sand(cell) or is_water(cell)
         assert type(x) == int and type(y) == int
-        if is_border(self.array[x][y]): return None
+        if is_border(self.array[x][y]) or not self.in_bounds(x, y): return None
+
         self.array[x][y] = cell
         self.set_awake(x, y)
 
@@ -41,8 +42,12 @@ class World():
         self.set_cell(x2, y2, self.array[x1][y1])
         self.set_cell(x1, y1, cell2)
 
-    def set_cells(self, cur_x, cur_y, del_x, del_y, cell):
-        line_alg(cur_x, cur_y, del_x, del_y, lambda x, y: self.set_cell(x, y, cell))
+    def set_cells(self, cur_x, cur_y, del_x, del_y, cell, brush_size):
+        def draw_brush(x, y):
+            for x_ in range(x - brush_size, x + brush_size):
+                for y_ in range(y - brush_size, y + brush_size):
+                    self.set_cell(x_, y_, cell)
+        line_alg(cur_x, cur_y, del_x, del_y, draw_brush)
 
     def in_bounds(self, x, y):
         return x >= 0 and x < self.width and y >= 0 and y < self.height
