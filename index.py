@@ -23,6 +23,7 @@ display = pygame.display.set_mode((WIDTH, HEIGHT))
 
 running = True
 is_mouse_dragging = False
+placing_water = 1
 
 while running:
     for event in pygame.event.get():
@@ -32,12 +33,14 @@ while running:
             is_mouse_dragging = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             is_mouse_dragging = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            placing_water = 1 - placing_water
 
     cur_x, cur_y = pygame.mouse.get_pos()
     del_x, del_y = pygame.mouse.get_rel()
 
-    if is_mouse_dragging and world_obj.get_num_awake() < 1200: 
-        world_obj.set_cells(cur_x, cur_y, del_x, del_y, world.SAND)
+    if is_mouse_dragging and world_obj.get_num_awake() < 600: 
+        world_obj.set_cells(cur_x, cur_y, del_x, del_y, world.WATER if placing_water else world.SAND)
         
     draw_array_to_screen(world_obj.get_rgbs(), display)
 
