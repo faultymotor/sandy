@@ -1,17 +1,18 @@
 import numpy as np
+import random as random
 
-check = lambda n: lambda x: list(x) == n
+check = lambda n: lambda x: list(x) == list(n)
 
-NOTHING = [0, 0, 0]
+NOTHING = np.asarray([0, 0, 0])
 is_nothing = check(NOTHING)
 
-BORDER = [255, 255, 255]
+BORDER = np.asarray([255, 255, 255])
 is_border = check(BORDER)
 
-SAND = [255, 255, 204]
+SAND = np.asarray([255, 255, 204])
 is_sand = check(SAND)
 
-WATER = [28, 163, 236]
+WATER = np.asarray([28, 163, 236])
 is_water = check(WATER)
 
 class World():
@@ -32,13 +33,13 @@ class World():
     def set_cell(self, x, y, cell):
         assert is_nothing(cell) or is_sand(cell) or is_water(cell)
         assert type(x) == int and type(y) == int
-        if is_border(self.array[x][y]) or not self.in_bounds(x, y): return None
+        if not self.in_bounds(x, y) or is_border(self.array[x][y]): return None
 
         self.array[x][y] = cell
         self.set_awake(x, y)
 
     def swap_cell(self, x1, y1, x2, y2):
-        cell2 = self.array[x2][y2].copy()
+        cell2 = np.copy(self.array[x2][y2])
         self.set_cell(x2, y2, self.array[x1][y1])
         self.set_cell(x1, y1, cell2)
 
@@ -56,65 +57,67 @@ class World():
         coords = [x, y]
         if not coords in self.awake and self.in_bounds(x, y): self.awake += [coords]
 
-    def get_rgbs(self):
-        return self.array
+    def get_surface(self):
+        return self.surface
 
     def get_num_awake(self):
         return len(self.awake)
 
     def tick(self):
         self.single_tick()
-    
+
+        width, height = self.surface.get_size()
+
+        scale = width // np.shape(self.array)[0] or 1
+
+        # offset = 25
+
+        # def noise(mat):
+        #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
+
         for coord in self.awake:
-            self.surface.set_at(coord, self.array[coord[0]][coord[1]])
+            x, y = coord
+            mat = self.array[x][y]
+            for dx in range(scale):
+                for dy in range(scale):
+                    
+                    self.surface.set_at((scale * x + dx, scale * y + dy), mat)
 
     def single_tick(self):
         old_awake = self.awake
         self.awake = []
 
+        old_awake.sort(key=lambda v: v[1], reverse=True)
+
         for cell in old_awake:
             x, y = cell
-            moved = False
-            # left = 1 if x % 2 == 0 else -1
+            left = 1 if x % 2 == 0 else -1
 
-            def check_and_swap(dx, dy, f):
-                # dx *= left
-                #if self.in_bounds(x + dx, y + dy) and f(self.array[x + dx][y + dy]):
-                if f(self.array[x + dx][y + dy]):
-                    self.swap_cell(x, y, x + dx, y + dy)
-                    return True
-                return False
+            def check_and_swap(cond, *deltas):
+                for delta in deltas:
+                    dx, dy = delta
+                    dx *= left
+                    if cond(self.array[x + dx][y + dy]):
+                        self.swap_cell(x, y, x + dx, y + dy)
+                        return True
 
             if is_sand(self.array[x][y]):
                 if y + 1 < self.height:
-                    if check_and_swap(0, 1, lambda x: is_nothing(x) or is_water(x)): moved = True
-                    elif check_and_swap(1, 1, lambda x: is_nothing(x) or is_water(x)): moved = True
-                    elif check_and_swap(-1, 1, lambda x: is_nothing(x) or is_water(x)): moved = True
-
+                    check_and_swap(lambda x: is_nothing(x) or is_water(x), (0, 1), (1, 1), (-1, 1))
                     self.set_awake(x, y - 1)
 
             if is_water(self.array[x][y]):
                 if y + 1 < self.height:
-                    if check_and_swap(0, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(1, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(-1, 1, lambda x: is_nothing(x)): moved = True
-                   # elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
-                   # elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
-                   # elif check_and_swap(3, 1, lambda x: is_nothing(x)): moved = True
-                    #elif check_and_swap(-3, 1, lambda x: is_nothing(x)): moved = True
-                if not moved:
-                    if check_and_swap(1, 0, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(-1, 0, lambda x: is_nothing(x)): moved = True
-                    #elif check_and_swap(2, 0, lambda x: is_nothing(x)): moved = True
-                    #elif check_and_swap(-2, 0, lambda x: is_nothing(x)): moved = True
-                if moved: 
+                    check_and_swap(lambda x: is_nothing(x), (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
                     self.set_awake(x, y - 1)
                     self.set_awake(x - 1, y)
                     self.set_awake(x + 1, y)
 
 def line_alg(cur_x, cur_y, del_x, del_y, f):
         distance = del_x ** 2 + del_y ** 2
-        for i in range(0, 100, 1 if not distance else (100 // distance or 1)):
+        distance = 100 // distance if distance else 1
+        step = int(distance or 1)
+        for i in range(0, 100, step):
             x = cur_x - (i / 100) * del_x
             y = cur_y - (i / 100) * del_y
             x, y = int(x), int(y)

@@ -1,12 +1,19 @@
 import pygame
-import numpy as np
+from pygame.locals import *
 from math import sqrt
 
 from sandy import world
 
-WIDTH, HEIGHT = 600, 300
+WIDTH, HEIGHT = 800, 800
+WORLD_WIDTH, WORLD_HEIGHT = 100, 100
 BRUSH_SIZE = 3
 FPS = 30
+
+assert WIDTH % WORLD_WIDTH == 0
+assert HEIGHT % WORLD_HEIGHT == 0
+assert WIDTH / WORLD_WIDTH == HEIGHT / WORLD_HEIGHT
+
+SCALE = WIDTH / WORLD_WIDTH
 
 clock = pygame.time.Clock()
  
@@ -14,17 +21,18 @@ pygame.init()
 pygame.display.set_caption('sandy')
 
 display = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.event.set_allowed([QUIT, KEYDOWN, MOUSEBUTTONUP, MOUSEBUTTONDOWN])
 
 running = True
 is_mouse_dragging = False
-placing_water = 1
+placing_water = 0
 
 surface = pygame.Surface((WIDTH, HEIGHT))
 surface.fill((0, 0, 0))
-world_obj = world.World(surface, WIDTH, HEIGHT)
+world_obj = world.World(surface, WORLD_WIDTH, WORLD_HEIGHT)
 
 
-def draw_array_to_screen(array, display):    
+def draw_array_to_screen(display):    
     display.blit(surface, (0, 0))
 
 while running:
@@ -41,12 +49,11 @@ while running:
     cur_x, cur_y = pygame.mouse.get_pos()
     del_x, del_y = pygame.mouse.get_rel()
 
-    if is_mouse_dragging and world_obj.get_num_awake() < 2400: 
+    if is_mouse_dragging and world_obj.get_num_awake() < 1200: 
         placing = world.WATER if placing_water else world.SAND
-        world_obj.set_cells(cur_x, cur_y, del_x, del_y, placing, BRUSH_SIZE)
+        world_obj.set_cells(cur_x / SCALE, cur_y / SCALE, del_x // SCALE, del_y // SCALE, placing, BRUSH_SIZE)
 
-        
-    draw_array_to_screen(world_obj.get_rgbs(), display)
+    display.blit(world_obj.get_surface(), (0, 0))
 
     pygame.display.update()
     world_obj.tick()
