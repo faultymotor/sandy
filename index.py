@@ -39,7 +39,7 @@ while running:
     cur_x, cur_y = pygame.mouse.get_pos()
     del_x, del_y = pygame.mouse.get_rel()
 
-    if is_mouse_dragging and world_obj.get_num_awake() < 600: 
+    if is_mouse_dragging and world_obj.get_num_awake() < 1000: 
         world_obj.set_cells(cur_x, cur_y, del_x, del_y, world.WATER if placing_water else world.SAND)
         
     draw_array_to_screen(world_obj.get_rgbs(), display)

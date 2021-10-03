@@ -28,12 +28,7 @@ class World():
         self.set_cell(x1, y1, cell2)
 
     def set_cells(self, cur_x, cur_y, del_x, del_y, cell):
-        distance = del_x ** 2 + del_y ** 2
-        for i in range(0, 100, 1 if not distance else (100 // distance or 1)):
-            x = cur_x - (i / 100) * del_x
-            y = cur_y - (i / 100) * del_y
-            x, y = int(x), int(y)
-            self.set_cell(x, y, cell)
+        line_alg(cur_x, cur_y, del_x, del_y, lambda x, y: self.set_cell(x, y, cell))
 
     def in_bounds(self, x, y):
         return x >= 0 and x < self.width and y >= 0 and y < self.height
@@ -81,21 +76,27 @@ class World():
                     if check_and_swap(0, 1, lambda x: is_nothing(x)): moved = True
                     elif check_and_swap(1, 1, lambda x: is_nothing(x)): moved = True
                     elif check_and_swap(-1, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(3, 1, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(-3, 1, lambda x: is_nothing(x)): moved = True
+                   # elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
+                   # elif check_and_swap(2, 1, lambda x: is_nothing(x)): moved = True
+                   # elif check_and_swap(3, 1, lambda x: is_nothing(x)): moved = True
+                    #elif check_and_swap(-3, 1, lambda x: is_nothing(x)): moved = True
                 if not moved:
                     if check_and_swap(1, 0, lambda x: is_nothing(x)): moved = True
                     elif check_and_swap(-1, 0, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(2, 0, lambda x: is_nothing(x)): moved = True
-                    elif check_and_swap(-2, 0, lambda x: is_nothing(x)): moved = True
+                    #elif check_and_swap(2, 0, lambda x: is_nothing(x)): moved = True
+                    #elif check_and_swap(-2, 0, lambda x: is_nothing(x)): moved = True
                 if moved: 
                     self.set_awake(x, y + 1)
                     self.set_awake(x - 1, y)
                     self.set_awake(x + 1, y)
 
-
+def line_alg(cur_x, cur_y, del_x, del_y, f):
+        distance = del_x ** 2 + del_y ** 2
+        for i in range(0, 100, 1 if not distance else (100 // distance or 1)):
+            x = cur_x - (i / 100) * del_x
+            y = cur_y - (i / 100) * del_y
+            x, y = int(x), int(y)
+            f(x, y)
 
                 
 
