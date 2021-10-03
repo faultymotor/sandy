@@ -1,24 +1,38 @@
 import numpy as np
 
+check = lambda n: lambda x: list(x) == n
+
 NOTHING = [0, 0, 0]
-is_nothing = lambda x: list(x) == NOTHING
+is_nothing = check(NOTHING)
+
+BORDER = [255, 255, 255]
+is_border = check(BORDER)
 
 SAND = [255, 255, 204]
-is_sand = lambda x: list(x) == SAND
+is_sand = check(SAND)
 
 WATER = [28, 163, 236]
-is_water = lambda x: list(x) == WATER
+is_water = check(WATER)
 
 class World():
-    def __init__(self, width, height, gravity):
-        self.width, self.height, self.gravity = width, height, gravity
-        self.array = np.zeros((width, height, 3))
+    def __init__(self, surface, width, height):
+        self.surface, self.width, self.height = surface, width, height
+
+        world = np.zeros((width, height, 3))
+        for y in range(height): 
+            world[0][y] = BORDER
+            world[width - 1][y] = BORDER
+        for x in range(width):
+            world[x][0] = BORDER
+            world[x][height - 1] = BORDER
+
+        self.array = world
         self.awake = []
 
     def set_cell(self, x, y, cell):
         assert is_nothing(cell) or is_sand(cell) or is_water(cell)
         assert type(x) == int and type(y) == int
-
+        if is_border(self.array[x][y]): return None
         self.array[x][y] = cell
         self.set_awake(x, y)
 
@@ -44,8 +58,10 @@ class World():
         return len(self.awake)
 
     def tick(self):
-        for i in range(self.gravity):
-            self.single_tick()
+        self.single_tick()
+    
+        for coord in self.awake:
+            self.surface.set_at(coord, self.array[coord[0]][coord[1]])
 
     def single_tick(self):
         old_awake = self.awake
@@ -54,11 +70,12 @@ class World():
         for cell in old_awake:
             x, y = cell
             moved = False
-            left = 1 if x % 2 == 0 else -1
+            # left = 1 if x % 2 == 0 else -1
 
-            def check_and_swap(dx, dy, truthy):
-                dx *= left
-                if self.in_bounds(x + dx, y + dy) and truthy(self.array[x + dx][y + dy]):
+            def check_and_swap(dx, dy, f):
+                # dx *= left
+                #if self.in_bounds(x + dx, y + dy) and f(self.array[x + dx][y + dy]):
+                if f(self.array[x + dx][y + dy]):
                     self.swap_cell(x, y, x + dx, y + dy)
                     return True
                 return False
@@ -69,7 +86,7 @@ class World():
                     elif check_and_swap(1, 1, lambda x: is_nothing(x) or is_water(x)): moved = True
                     elif check_and_swap(-1, 1, lambda x: is_nothing(x) or is_water(x)): moved = True
 
-                    self.set_awake(x, y + 1)
+                    self.set_awake(x, y - 1)
 
             if is_water(self.array[x][y]):
                 if y + 1 < self.height:
@@ -86,7 +103,7 @@ class World():
                     #elif check_and_swap(2, 0, lambda x: is_nothing(x)): moved = True
                     #elif check_and_swap(-2, 0, lambda x: is_nothing(x)): moved = True
                 if moved: 
-                    self.set_awake(x, y + 1)
+                    self.set_awake(x, y - 1)
                     self.set_awake(x - 1, y)
                     self.set_awake(x + 1, y)
 
