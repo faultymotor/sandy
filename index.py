@@ -6,6 +6,7 @@ from sandy import world
 
 WIDTH, HEIGHT = 800, 800
 WORLD_WIDTH, WORLD_HEIGHT = 100, 100
+TICK_SPEED = 3
 BRUSH_SIZE = 3
 FPS = 30
 
@@ -29,7 +30,7 @@ placing_water = 0
 
 surface = pygame.Surface((WIDTH, HEIGHT))
 surface.fill((0, 0, 0))
-world_obj = world.World(surface, WORLD_WIDTH, WORLD_HEIGHT)
+world_obj = world.World(surface, WORLD_WIDTH, WORLD_HEIGHT, TICK_SPEED)
 
 
 def draw_array_to_screen(display):    

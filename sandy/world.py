@@ -6,7 +6,7 @@ check = lambda n: lambda x: list(x) == list(n)
 NOTHING = np.asarray([0, 0, 0])
 is_nothing = check(NOTHING)
 
-BORDER = np.asarray([255, 255, 255])
+BORDER = np.asarray([1, 1, 1])
 is_border = check(BORDER)
 
 SAND = np.asarray([255, 255, 204])
@@ -16,22 +16,21 @@ WATER = np.asarray([28, 163, 236])
 is_water = check(WATER)
 
 class World():
-    def __init__(self, surface, width, height):
-        self.surface, self.width, self.height = surface, width, height
+    def __init__(self, surface, width, height, tick_speed):
+        self.surface, self.width, self.height, self.tick_speed = surface, width, height, tick_speed
 
-        world = np.zeros((width, height, 3))
-        for y in range(height): 
-            world[0][y] = BORDER
-            world[width - 1][y] = BORDER
-        for x in range(width):
-            world[x][0] = BORDER
-            world[x][height - 1] = BORDER
-
-        self.array = world
+        self.array = np.zeros((width, height, 3))
         self.awake = []
 
+        for y in range(height): 
+            self.set_cell(0, y, BORDER)
+            self.set_cell(width - 1, y, BORDER)
+        for x in range(width):
+            self.set_cell(x, 0, BORDER)
+            self.set_cell(x, height - 1, BORDER)
+
     def set_cell(self, x, y, cell):
-        assert is_nothing(cell) or is_sand(cell) or is_water(cell)
+        assert is_nothing(cell) or is_sand(cell) or is_water(cell) or is_border(cell)
         assert type(x) == int and type(y) == int
         if not self.in_bounds(x, y) or is_border(self.array[x][y]): return None
 
@@ -64,24 +63,20 @@ class World():
         return len(self.awake)
 
     def tick(self):
-        self.single_tick()
+        for i in range(self.tick_speed):
+            self.single_tick()
 
-        width, height = self.surface.get_size()
+            width, height = self.surface.get_size()
 
-        scale = width // np.shape(self.array)[0] or 1
+            scale = width // np.shape(self.array)[0] or 1
 
-        # offset = 25
+            # offset = 25
 
-        # def noise(mat):
-        #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
+            # def noise(mat):
+            #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
 
-        for coord in self.awake:
-            x, y = coord
-            mat = self.array[x][y]
-            for dx in range(scale):
-                for dy in range(scale):
-                    
-                    self.surface.set_at((scale * x + dx, scale * y + dy), mat)
+            paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: self.array[x][y])
+
 
     def single_tick(self):
         old_awake = self.awake
@@ -112,6 +107,14 @@ class World():
                     self.set_awake(x, y - 1)
                     self.set_awake(x - 1, y)
                     self.set_awake(x + 1, y)
+
+def paint_coords_to_surface(coords, surface, scale, color):
+    for coord in coords:
+        x, y = coord
+        for dx in range(scale):
+            for dy in range(scale):
+                surface.set_at((scale * x + dx, scale * y + dy), color(x, y))    
+            
 
 def line_alg(cur_x, cur_y, del_x, del_y, f):
         distance = del_x ** 2 + del_y ** 2
