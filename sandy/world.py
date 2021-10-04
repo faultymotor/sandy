@@ -35,10 +35,10 @@ class World():
 
         if not self.in_bounds(x, y): return None
 
-        material = self.array[x][y]
+        material = self.array[x,y]
         if material == BORDER or (material == STONE and not cell == NOTHING): return None
 
-        self.array[x][y] = cell
+        self.array[x,y] = cell
         self.set_awake(x, y)
 
         # if (is_stone(cell)):
@@ -47,8 +47,8 @@ class World():
         #     paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: self.array[x][y])
 
     def swap_cell(self, x1, y1, x2, y2):
-        cell2 = np.copy(self.array[x2][y2])
-        self.set_cell(x2, y2, self.array[x1][y1])
+        cell2 = np.copy(self.array[x2,y2])
+        self.set_cell(x2, y2, self.array[x1,y1])
         self.set_cell(x1, y1, cell2)
 
     def set_cells(self, cur_x, cur_y, del_x, del_y, cell, brush_size):
@@ -82,21 +82,21 @@ class World():
             # def noise(mat):
             #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
 
-            paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: MATERIALS[self.array[x][y]])
+            paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: MATERIALS[self.array[x,y]])
 
             self.single_tick()
 
 
     def single_tick(self):
-        woken = np.copy(self.awake).tolist()
+        cells_to_update = np.copy(self.awake).tolist()
 
         self.awake = []
 
-        seed = len(woken)
+        seed = len(cells_to_update)
 
-        woken.sort(key=lambda v: v[1], reverse=True)
+        cells_to_update.sort(key=lambda v: v[1], reverse=True)
 
-        for cell in woken:
+        for cell in cells_to_update:
             x, y = cell
             left = 1 if (x + y + seed) % 2 == 0 else -1
 
@@ -104,17 +104,17 @@ class World():
                 for delta in deltas:
                     dx, dy = delta
                     dx *= left
-                    if cond(self.array[x + dx][y + dy]):
+                    if cond(self.array[x + dx,y + dy]):
                         self.swap_cell(x, y, x + dx, y + dy)
                         for delta in deltas:
                             dx, dy = delta
                             self.set_awake(x - dx, y - dy)
                         return True
 
-            if self.array[x][y] == SAND:
+            if self.array[x,y] == SAND:
                 check_and_swap(lambda x: x == NOTHING or x == WATER, (0, 1), (1, 1), (-1, 1))                      
 
-            if self.array[x][y] == WATER and y + 2 < self.height:
+            if self.array[x,y] == WATER and y + 2 < self.height:
                 check_and_swap(lambda x: x == NOTHING, (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
 
 def paint_coords_to_surface(coords, surface, scale, color):
