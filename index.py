@@ -4,7 +4,7 @@ from math import sqrt
 
 from sandy import world
 
-WIDTH, HEIGHT = 400, 200
+WIDTH, HEIGHT = 800, 400
 WORLD_WIDTH, WORLD_HEIGHT = 200, 100
 TICK_SPEED = 1
 BRUSH_SIZE = 2

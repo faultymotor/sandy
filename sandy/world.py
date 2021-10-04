@@ -105,19 +105,16 @@ class World():
                     dx *= left
                     if cond(self.array[x + dx][y + dy]):
                         self.swap_cell(x, y, x + dx, y + dy)
+                        for delta in deltas:
+                            dx, dy = delta
+                            self.set_awake(x - dx, y - dy)
                         return True
 
             if is_sand(self.array[x][y]):
-                if y + 1 < self.height:
-                    check_and_swap(lambda x: is_nothing(x) or is_water(x), (0, 1), (1, 1), (-1, 1))
-                    self.set_awake(x, y - 1)
+                check_and_swap(lambda x: is_nothing(x) or is_water(x), (0, 1), (1, 1), (-1, 1))                      
 
             if is_water(self.array[x][y]):
-                if y + 1 < self.height:
-                    check_and_swap(lambda x: is_nothing(x), (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
-                    self.set_awake(x, y - 1)
-                    self.set_awake(x - 1, y)
-                    self.set_awake(x + 1, y)
+                check_and_swap(lambda x: is_nothing(x), (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
 
 def paint_coords_to_surface(coords, surface, scale, color):
     for coord in coords:
