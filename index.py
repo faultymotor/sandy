@@ -59,3 +59,5 @@ while running:
     pygame.display.update()
     world_obj.tick()
     clock.tick(FPS)
+
+    # print(clock.get_fps())

@@ -19,7 +19,7 @@ class World():
     def __init__(self, surface, width, height, tick_speed):
         self.surface, self.width, self.height, self.tick_speed = surface, width, height, tick_speed
 
-        self.array = np.zeros((width, height, 3))
+        self.array = np.zeros((width, height, 3), dtype='uint8')
         self.awake = []
 
         for y in range(height): 
@@ -55,7 +55,6 @@ class World():
     def set_awake(self, x, y):
         coords = [x, y]
         if not coords in self.awake and self.in_bounds(x, y): self.awake += [coords]
-
     def get_surface(self):
         return self.surface
 
@@ -79,12 +78,13 @@ class World():
 
 
     def single_tick(self):
-        old_awake = self.awake
+        woken = np.copy(self.awake).tolist()
+
         self.awake = []
 
-        old_awake.sort(key=lambda v: v[1], reverse=True)
+        # old_awake.sort(key=lambda v: v[1], reverse=True)
 
-        for cell in old_awake:
+        for cell in woken:
             x, y = cell
             left = 1 if x % 2 == 0 else -1
 
