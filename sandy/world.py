@@ -82,11 +82,13 @@ class World():
 
         self.awake = []
 
-        # old_awake.sort(key=lambda v: v[1], reverse=True)
+        seed = len(woken)
+
+        woken.sort(key=lambda v: v[1], reverse=True)
 
         for cell in woken:
             x, y = cell
-            left = 1 if x % 2 == 0 else -1
+            left = 1 if (x + y + seed) % 2 == 0 else -1
 
             def check_and_swap(cond, *deltas):
                 for delta in deltas:

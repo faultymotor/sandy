@@ -4,10 +4,10 @@ from math import sqrt
 
 from sandy import world
 
-WIDTH, HEIGHT = 800, 800
-WORLD_WIDTH, WORLD_HEIGHT = 100, 100
-TICK_SPEED = 3
-BRUSH_SIZE = 3
+WIDTH, HEIGHT = 400, 200
+WORLD_WIDTH, WORLD_HEIGHT = 200, 100
+TICK_SPEED = 1
+BRUSH_SIZE = 2
 FPS = 30
 
 assert WIDTH % WORLD_WIDTH == 0
@@ -50,7 +50,7 @@ while running:
     cur_x, cur_y = pygame.mouse.get_pos()
     del_x, del_y = pygame.mouse.get_rel()
 
-    if is_mouse_dragging and world_obj.get_num_awake() < 1200: 
+    if is_mouse_dragging and world_obj.get_num_awake() < 200 + (1000 // BRUSH_SIZE): 
         placing = world.WATER if placing_water else world.SAND
         world_obj.set_cells(cur_x / SCALE, cur_y / SCALE, del_x // SCALE, del_y // SCALE, placing, BRUSH_SIZE)
 
