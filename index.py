@@ -26,7 +26,13 @@ pygame.event.set_allowed([QUIT, KEYDOWN, MOUSEBUTTONUP, MOUSEBUTTONDOWN])
 
 running = True
 is_mouse_dragging = False
-placing_water = 0
+mode = world.SAND
+
+def cycle_mode(mode):
+    if world.is_sand(mode): return world.WATER
+    elif world.is_water(mode): return world.STONE
+    elif world.is_stone(mode): return world.NOTHING
+    elif world.is_nothing(mode): return world.SAND
 
 surface = pygame.Surface((WIDTH, HEIGHT))
 surface.fill((0, 0, 0))
@@ -45,14 +51,13 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             is_mouse_dragging = True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            placing_water = 1 - placing_water
+           mode = cycle_mode(mode)
 
     cur_x, cur_y = pygame.mouse.get_pos()
     del_x, del_y = pygame.mouse.get_rel()
 
     if is_mouse_dragging and world_obj.get_num_awake() < 200 + (1000 // BRUSH_SIZE): 
-        placing = world.WATER if placing_water else world.SAND
-        world_obj.set_cells(cur_x / SCALE, cur_y / SCALE, del_x // SCALE, del_y // SCALE, placing, BRUSH_SIZE)
+        world_obj.set_cells(cur_x / SCALE, cur_y / SCALE, del_x // SCALE, del_y // SCALE, mode, BRUSH_SIZE)
 
     display.blit(world_obj.get_surface(), (0, 0))
 

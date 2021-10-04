@@ -15,6 +15,9 @@ is_sand = check(SAND)
 WATER = np.asarray([28, 163, 236])
 is_water = check(WATER)
 
+STONE = np.asarray([145, 142, 133])
+is_stone = check(STONE)
+
 class World():
     def __init__(self, surface, width, height, tick_speed):
         self.surface, self.width, self.height, self.tick_speed = surface, width, height, tick_speed
@@ -30,12 +33,17 @@ class World():
             self.set_cell(x, height - 1, BORDER)
 
     def set_cell(self, x, y, cell):
-        assert is_nothing(cell) or is_sand(cell) or is_water(cell) or is_border(cell)
+        assert is_nothing(cell) or is_sand(cell) or is_water(cell) or is_border(cell) or is_stone(cell)
         assert type(x) == int and type(y) == int
-        if not self.in_bounds(x, y) or is_border(self.array[x][y]): return None
+        if not self.in_bounds(x, y) or is_border(self.array[x][y]) or is_stone(self.array[x][y]): return None
 
         self.array[x][y] = cell
         self.set_awake(x, y)
+
+        # if (is_stone(cell)):
+        #     width, height = self.surface.get_size()
+        #     scale = width // np.shape(self.array)[0] or 1
+        #     paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: self.array[x][y])
 
     def swap_cell(self, x1, y1, x2, y2):
         cell2 = np.copy(self.array[x2][y2])
@@ -55,6 +63,7 @@ class World():
     def set_awake(self, x, y):
         coords = [x, y]
         if not coords in self.awake and self.in_bounds(x, y): self.awake += [coords]
+
     def get_surface(self):
         return self.surface
 
@@ -63,8 +72,6 @@ class World():
 
     def tick(self):
         for i in range(self.tick_speed):
-            self.single_tick()
-
             width, height = self.surface.get_size()
 
             scale = width // np.shape(self.array)[0] or 1
@@ -75,6 +82,8 @@ class World():
             #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
 
             paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: self.array[x][y])
+
+            self.single_tick()
 
 
     def single_tick(self):
