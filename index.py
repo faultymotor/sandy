@@ -65,4 +65,5 @@ while running:
     world_obj.tick()
     clock.tick(FPS)
 
+    pygame.display.set_caption('sandy | FPS: ' + str(clock.get_fps()))
     # print(clock.get_fps())
