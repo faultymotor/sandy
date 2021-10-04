@@ -5,8 +5,8 @@ from math import sqrt
 from sandy import world
 
 WIDTH, HEIGHT = 800, 400
-WORLD_WIDTH, WORLD_HEIGHT = 200, 100
-TICK_SPEED = 1
+WORLD_WIDTH, WORLD_HEIGHT = 800, 400
+TICK_SPEED = 3
 BRUSH_SIZE = 2
 FPS = 30
 
@@ -16,7 +16,7 @@ assert WIDTH / WORLD_WIDTH == HEIGHT / WORLD_HEIGHT
 
 SCALE = WIDTH / WORLD_WIDTH
 
-clock = pygame.time.Clock()
+clock = pygame.time.Clock() 
  
 pygame.init()
 pygame.display.set_caption('sandy')
@@ -29,10 +29,10 @@ is_mouse_dragging = False
 mode = world.SAND
 
 def cycle_mode(mode):
-    if world.is_sand(mode): return world.WATER
-    elif world.is_water(mode): return world.STONE
-    elif world.is_stone(mode): return world.NOTHING
-    elif world.is_nothing(mode): return world.SAND
+    if mode == world.SAND: return world.WATER
+    elif mode == world.WATER: return world.STONE
+    elif mode == world.STONE: return world.NOTHING
+    elif mode == world.NOTHING: return world.SAND
 
 surface = pygame.Surface((WIDTH, HEIGHT))
 surface.fill((0, 0, 0))

@@ -1,28 +1,25 @@
 import numpy as np
 import random as random
 
-check = lambda n: lambda x: list(x) == list(n)
+NOTHING = 0
+BORDER = 1
+SAND = 2
+WATER = 3
+STONE = 4
 
-NOTHING = np.asarray([0, 0, 0])
-is_nothing = check(NOTHING)
-
-BORDER = np.asarray([1, 1, 1])
-is_border = check(BORDER)
-
-SAND = np.asarray([255, 255, 204])
-is_sand = check(SAND)
-
-WATER = np.asarray([28, 163, 236])
-is_water = check(WATER)
-
-STONE = np.asarray([145, 142, 133])
-is_stone = check(STONE)
+MATERIALS = {
+    NOTHING: np.asarray([0, 0, 0]),
+    BORDER: np.asarray([1, 1, 1]),
+    SAND: np.asarray([255, 255, 204]),
+    WATER: np.asarray([28, 163, 236]),
+    STONE: np.asarray([145, 142, 133])
+}
 
 class World():
     def __init__(self, surface, width, height, tick_speed):
         self.surface, self.width, self.height, self.tick_speed = surface, width, height, tick_speed
 
-        self.array = np.zeros((width, height, 3), dtype='uint8')
+        self.array = np.zeros((width, height), dtype='u1')
         self.awake = []
 
         for y in range(height): 
@@ -33,9 +30,13 @@ class World():
             self.set_cell(x, height - 1, BORDER)
 
     def set_cell(self, x, y, cell):
-        assert is_nothing(cell) or is_sand(cell) or is_water(cell) or is_border(cell) or is_stone(cell)
+        # assert is_nothing(cell) or is_sand(cell) or is_water(cell) or is_border(cell) or is_stone(cell)
         assert type(x) == int and type(y) == int
-        if not self.in_bounds(x, y) or is_border(self.array[x][y]) or is_stone(self.array[x][y]): return None
+
+        if not self.in_bounds(x, y): return None
+
+        material = self.array[x][y]
+        if material == BORDER or (material == STONE and not cell == NOTHING): return None
 
         self.array[x][y] = cell
         self.set_awake(x, y)
@@ -81,7 +82,7 @@ class World():
             # def noise(mat):
             #     return [i - offset + int(offset * random.random()) if i > offset else i for i in mat]
 
-            paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: self.array[x][y])
+            paint_coords_to_surface(self.awake, self.surface, scale, lambda x, y: MATERIALS[self.array[x][y]])
 
             self.single_tick()
 
@@ -110,11 +111,11 @@ class World():
                             self.set_awake(x - dx, y - dy)
                         return True
 
-            if is_sand(self.array[x][y]):
-                check_and_swap(lambda x: is_nothing(x) or is_water(x), (0, 1), (1, 1), (-1, 1))                      
+            if self.array[x][y] == SAND:
+                check_and_swap(lambda x: x == NOTHING or x == WATER, (0, 1), (1, 1), (-1, 1))                      
 
-            if is_water(self.array[x][y]):
-                check_and_swap(lambda x: is_nothing(x), (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
+            if self.array[x][y] == WATER and y + 2 < self.height:
+                check_and_swap(lambda x: x == NOTHING, (0, 1), (1, 1), (-1, 1), (1, 0), (-1, 0))
 
 def paint_coords_to_surface(coords, surface, scale, color):
     for coord in coords:
