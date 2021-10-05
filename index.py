@@ -5,7 +5,7 @@ from math import sqrt
 from sandy import world
 
 WIDTH, HEIGHT = 800, 400
-WORLD_WIDTH, WORLD_HEIGHT = 200, 100
+WORLD_WIDTH, WORLD_HEIGHT = 400, 200
 TICK_SPEED = 3
 BRUSH_SIZE = 2
 FPS = 30
@@ -65,5 +65,5 @@ while running:
     world_obj.tick()
     clock.tick(FPS)
 
-    pygame.display.set_caption('sandy | FPS: ' + str(clock.get_fps()))
+    pygame.display.set_caption('sandy | FPS: ' + str(int(clock.get_fps())) + ' | MODE: ' + str(mode) + ' | AWAKE: ' + str(world_obj.get_num_awake()) + ' cells')
     # print(clock.get_fps())
